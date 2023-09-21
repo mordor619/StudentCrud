@@ -54,11 +54,6 @@ namespace StudentCrud.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutStudent(string id, Student student)
         {
-            if (id != student.Id)
-            {
-                return BadRequest();
-            }
-
             _context.Entry(student).State = EntityState.Modified;
 
             try
@@ -85,6 +80,7 @@ namespace StudentCrud.Controllers
         [HttpPost]
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
+          student.Id = Guid.NewGuid().ToString();
           if (_context.Students == null)
           {
               return Problem("Entity set 'CollegeContext.Students'  is null.");
@@ -106,7 +102,7 @@ namespace StudentCrud.Controllers
                 }
             }
 
-            return CreatedAtAction("GetStudent", new { id = student.Id }, student);
+            return CreatedAtAction(nameof(GetStudent), new { id = student.Id }, student);
         }
 
         // DELETE: api/Students/5
