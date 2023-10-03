@@ -63,11 +63,11 @@ if (app.Environment.IsDevelopment())
 //add this
 app.UseRouting();
 
-app.UseHttpsRedirection();
-
 //add this for 2 auth's
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHttpsRedirection();
 
 app.MapControllers();
 

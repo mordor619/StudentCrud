@@ -1,12 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentCrud.Auth;
-using System.Web.Http;
 
 namespace StudentCrud.Controllers
 {
     [Authorize(Roles = UserRoles.User)]
     [ApiController]
-    [Microsoft.AspNetCore.Mvc.Route("[controller]")]
+    [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -21,7 +21,7 @@ namespace StudentCrud.Controllers
             _logger = logger;
         }
 
-        [Microsoft.AspNetCore.Mvc.HttpGet(Name = "GetWeatherForecast")]
+        [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast

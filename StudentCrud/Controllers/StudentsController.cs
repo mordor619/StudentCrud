@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentCrud.Auth;
 using StudentCrud.Model;
-using System.Web.Http;
+using System.Security.Claims;
 
 namespace StudentCrud.Controllers
 {
-    [System.Web.Http.Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.Admin)]
     [ApiController]
-    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
+    [Route("api/[controller]")]
     public class StudentsController : ControllerBase
     {
         private readonly CollegeContext _context;
@@ -20,9 +20,16 @@ namespace StudentCrud.Controllers
         }
 
         // GET: api/Students
-        [Microsoft.AspNetCore.Mvc.HttpGet]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
+          var claims = User.Claims.Select(c => $"{c.Type}: {c.Value}");
+
+          var isAdmin = User.IsInRole(UserRoles.Admin);
+
+          var identity = (ClaimsIdentity)User.Identity;
+          var roles = identity.FindAll(ClaimTypes.Role).Select(c => c.Value);
+
           if (_context.Students == null)
           {
               return NotFound();
@@ -31,7 +38,7 @@ namespace StudentCrud.Controllers
         }
 
         // GET: api/Students/5
-        [Microsoft.AspNetCore.Mvc.HttpGet("{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Student>> GetStudent(string id)
         {
           if (_context.Students == null)
@@ -50,7 +57,7 @@ namespace StudentCrud.Controllers
 
         // PUT: api/Students/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Microsoft.AspNetCore.Mvc.HttpPut("{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> PutStudent(string id, Student student)
         {
             _context.Entry(student).State = EntityState.Modified;
@@ -76,7 +83,7 @@ namespace StudentCrud.Controllers
 
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Microsoft.AspNetCore.Mvc.HttpPost]
+        [HttpPost]
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
           student.Id = Guid.NewGuid().ToString();
@@ -105,7 +112,7 @@ namespace StudentCrud.Controllers
         }
 
         // DELETE: api/Students/5
-        [Microsoft.AspNetCore.Mvc.HttpDelete("{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(string id)
         {
             if (_context.Students == null)
