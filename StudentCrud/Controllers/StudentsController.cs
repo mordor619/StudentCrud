@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StudentCrud.Auth;
 using StudentCrud.Model;
+using System.Web.Http;
 
 namespace StudentCrud.Controllers
 {
-    [Route("api/[controller]")]
+    [System.Web.Http.Authorize(Roles = UserRoles.Admin)]
     [ApiController]
+    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
     public class StudentsController : ControllerBase
     {
         private readonly CollegeContext _context;
@@ -21,7 +20,7 @@ namespace StudentCrud.Controllers
         }
 
         // GET: api/Students
-        [HttpGet]
+        [Microsoft.AspNetCore.Mvc.HttpGet]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
           if (_context.Students == null)
@@ -32,7 +31,7 @@ namespace StudentCrud.Controllers
         }
 
         // GET: api/Students/5
-        [HttpGet("{id}")]
+        [Microsoft.AspNetCore.Mvc.HttpGet("{id}")]
         public async Task<ActionResult<Student>> GetStudent(string id)
         {
           if (_context.Students == null)
@@ -51,7 +50,7 @@ namespace StudentCrud.Controllers
 
         // PUT: api/Students/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [Microsoft.AspNetCore.Mvc.HttpPut("{id}")]
         public async Task<IActionResult> PutStudent(string id, Student student)
         {
             _context.Entry(student).State = EntityState.Modified;
@@ -77,7 +76,7 @@ namespace StudentCrud.Controllers
 
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [Microsoft.AspNetCore.Mvc.HttpPost]
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
           student.Id = Guid.NewGuid().ToString();
@@ -106,7 +105,7 @@ namespace StudentCrud.Controllers
         }
 
         // DELETE: api/Students/5
-        [HttpDelete("{id}")]
+        [Microsoft.AspNetCore.Mvc.HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(string id)
         {
             if (_context.Students == null)
