@@ -5,5 +5,10 @@
         public string? uname { get; set; }
 
         public string? upassword { get; set; }
+
+        public LoginModel() 
+        {
+            
+        }
     }
 }

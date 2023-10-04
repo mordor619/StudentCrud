@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StudentCrud.Auth;
+using StudentCrud.Middleware;
 using StudentCrud.Model;
 using System.Text;
 
@@ -12,6 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 //add this
 builder.Services.AddDbContext<CollegeContext>();
+
+//add this for manager dependency injection
+builder.Services.AddSingleton<AuthenticateManager>();
+builder.Services.AddSingleton<StudentsManager>();
 
 //add this for authentication and authorization
 ConfigurationManager configuration = builder.Configuration;

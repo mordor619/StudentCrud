@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentCrud.Auth;
+using StudentCrud.Middleware;
 using StudentCrud.Model;
 using System.Security.Claims;
 
@@ -13,22 +14,27 @@ namespace StudentCrud.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly CollegeContext _context;
+        private readonly StudentsManager _studentsManager;
 
-        public StudentsController(CollegeContext context)
+        public StudentsController(CollegeContext context, StudentsManager studentsManager)
         {
             _context = context;
+            _studentsManager = studentsManager;
         }
 
         // GET: api/Students
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
+            /*
           var claims = User.Claims.Select(c => $"{c.Type}: {c.Value}");
 
           var isAdmin = User.IsInRole(UserRoles.Admin);
 
           var identity = (ClaimsIdentity)User.Identity;
           var roles = identity.FindAll(ClaimTypes.Role).Select(c => c.Value);
+
+            */
 
           if (_context.Students == null)
           {
@@ -68,7 +74,7 @@ namespace StudentCrud.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!StudentExists(id))
+                if (!_studentsManager.StudentExists(id, _context))
                 {
                     return NotFound();
                 }
@@ -86,7 +92,8 @@ namespace StudentCrud.Controllers
         [HttpPost]
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
-          student.Id = Guid.NewGuid().ToString();
+          student.Id = _studentsManager.generateGuid();
+
           if (_context.Students == null)
           {
               return Problem("Entity set 'CollegeContext.Students'  is null.");
@@ -98,7 +105,7 @@ namespace StudentCrud.Controllers
             }
             catch (DbUpdateException)
             {
-                if (StudentExists(student.Id))
+                if (_studentsManager.StudentExists(student.Id, _context))
                 {
                     return Conflict();
                 }
@@ -131,9 +138,5 @@ namespace StudentCrud.Controllers
             return NoContent();
         }
 
-        private bool StudentExists(string id)
-        {
-            return (_context.Students?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
     }
 }

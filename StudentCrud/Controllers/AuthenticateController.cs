@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using StudentCrud.Middleware;
 
 namespace StudentCrud.Controllers
 {
@@ -15,15 +16,18 @@ namespace StudentCrud.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly AuthenticateManager _authenticateManager;
 
         public AuthenticateController(
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            AuthenticateManager authenticateManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _authenticateManager = authenticateManager;
         }
 
         [HttpPost]
@@ -31,7 +35,7 @@ namespace StudentCrud.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByNameAsync(model.uname);
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.upassword))
+            if (await _authenticateManager.VerifyCredentials(user, _userManager, model))
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
 
@@ -46,7 +50,7 @@ namespace StudentCrud.Controllers
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
-                var token = GetToken(authClaims);
+                var token = _authenticateManager.GetToken(authClaims, _configuration);
 
                 return Ok(new
                 {
@@ -120,19 +124,5 @@ namespace StudentCrud.Controllers
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
-        private JwtSecurityToken GetToken(List<Claim> authClaims)
-        {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                );
-
-            return token;
-        }
     }
 }
